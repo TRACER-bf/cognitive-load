@@ -273,33 +273,33 @@ This architecture was something that made intuitive sense at first, but every ti
 
 If you think that such layering will allow you to quickly replace a database or other dependencies, you're mistaken. Changing the storage causes lots of problems, and believe us, having some abstractions for the data access layer is the least of your worries. At best, abstractions can save somewhat 10% of your migration time (if any), the real pain is in data model incompatibilities, communication protocols, distributed systems challenges, and [implicit interfaces](https://www.hyrumslaw.com).
 
-> With a sufficient number of users of an API,
-> it does not matter what you promise in the contract:
-> all observable behaviors of your system
-> will be depended on by somebody.
+> API의 사용자가 충분히 많아지면,
+> 계약서에 무엇을 약속하든 상관없이
+> 시스템의 모든 관찰 가능한 동작은
+> 누군가에 의해 의존될 것이다.
 
-We did a storage migration, and that took us about 10 months. The old system was single-threaded, so the exposed events were sequential. All our systems depended on that observed behaviour. This behavior was not part of the API contract, it was not reflected in the code. A new distributed storage didn't have that guarantee - the events came out-of-order. We spent only a few hours coding a new storage adapter, thanks to an abstraction. **We spent the next 10 months on dealing with out-of-order events and other challenges.** It's now funny to say that abstractions helps us replace components quickly.
+우리는 스토리지 마이그레이션을 했고, 10개월이 걸렸습니다. 예전 시스템은 단일 스레드라 이벤트가 순차적으로 발생했는데, 모든 시스템이 그 동작에 의존하고 있었습니다. 이 동작은 API 계약서에 명시된 것도, 코드에 드러난 것도 아니었습니다. 새로운 분산 스토리지는 그 보장을 제공하지 않았고, 이벤트가 순서 없이 나왔습니다. 추상화 덕분에 새로운 스토리지 어댑터 코딩은 몇 시간 만에 끝났지만, **이후 10개월을 이벤트 순서 문제 등 각종 문제 해결에 썼습니다.** 추상화가 컴포넌트 교체를 빠르게 해준다는 말이 이제는 우습게 느껴집니다.
 
-**So, why pay the price of high cognitive load for such a layered architecture, if it doesn't pay off in the future?** Plus, in most cases, that future of replacing some core component never happens.
+**미래에 보상이 없는 레이어드 아키텍처에 왜 높은 인지 부하라는 대가를 치러야 할까요?** 게다가 대부분의 경우, 핵심 컴포넌트를 교체하는 그 미래는 오지 않습니다.
 
-These architectures are not fundamental, they are just subjective, biased consequences of more fundamental principles. Why rely on those subjective interpretations? Follow the fundamental rules instead: dependency inversion principle, single source of truth, cognitive load and information hiding. Your business logic should not depend on low-level modules like database, UI or framework. We should be able to write tests for our core logic without worrying about the infrastructure, and that's it. [Discuss](https://github.com/zakirullin/cognitive-load/discussions/24).
+이런 아키텍처들은 근본적이지 않고, 더 근본적인 원칙의 주관적이고 편향된 결과일 뿐입니다. 그런 주관적 해석에 의존하지 말고, 근본 원칙(의존성 역전, 단일 소스, 인지 부하, 정보 은닉)을 따르세요. 비즈니스 로직은 데이터베이스, UI, 프레임워크 같은 저수준 모듈에 의존해서는 안 됩니다. 인프라 걱정 없이 핵심 로직에 대한 테스트를 쓸 수 있어야 합니다. [토론하기](https://github.com/zakirullin/cognitive-load/discussions/24)
 
-Do not add layers of abstractions for the sake of an architecture. Add them whenever you need an extension point that is justified for practical reasons.
+아키텍처를 위해 추상화 레이어를 추가하지 마세요. 실질적으로 확장 포인트가 필요할 때만 추가하세요.
 
-**[Layers of abstraction aren't free of charge](https://blog.jooq.org/why-you-should-not-implement-layered-architecture), they are to be held in our limited working memory**.
+**[추상화 레이어는 공짜가 아닙니다](https://blog.jooq.org/why-you-should-not-implement-layered-architecture), 우리의 제한된 작업 기억을 차지합니다.**
 
 <div align="center">
   <img src="/img/layers.png" alt="Layers" width="400">
 </div>
 
 ## 도메인 주도 설계(DDD)
-Domain-driven design has some great points, although it is often misinterpreted. People say "We write code in DDD", which is a bit strange, because DDD is about problem space, not about solution space.
+도메인 주도 설계는 훌륭한 점이 많지만, 종종 오해받습니다. "우리는 DDD로 코드를 짠다"고 말하는데, 사실 DDD는 문제 공간에 관한 것이지, 해법 공간에 관한 것이 아닙니다.
 
-Ubiquitous language, domain, bounded context, aggregate, event storming are all about problem space. They are meant to help us learn the insights about the domain and extract the boundaries. DDD enables developers, domain experts and business people to communicate effectively using a single, unified language. Rather than focusing on these problem space aspects of DDD, we tend to emphasise particular folder structures, services, repositories, and other solution space techniques.
+유비쿼터스 언어, 도메인, 바운디드 컨텍스트, 애그리게이트, 이벤트 스토밍 등은 모두 문제 공간에 관한 개념입니다. 이들은 개발자, 도메인 전문가, 비즈니스 담당자가 하나의 통일된 언어로 효과적으로 소통할 수 있게 해줍니다. 하지만 우리는 DDD의 이런 문제 공간적 측면보다는, 특정 폴더 구조, 서비스, 리포지토리 등 해법 공간적 기법에 더 집중하는 경향이 있습니다.
 
-Chances are that the way we interpret DDD is likely to be unique and subjective. And if we build code upon this understanding, i.e., if we create a lot of extraneous cognitive load - future developers are doomed. `🤯`
+DDD를 해석하는 방식은 사람마다 다릅니다. 이 해석을 바탕으로 코드를 만들면, 즉 불필요한 인지 부하를 만들면, 미래의 개발자들은 고생하게 됩니다. `🤯`
 
-Team Topologies provides a much better, easier to understand framework that helps us split the cognitive load across teams. Engineers tend to develop somewhat similar mental models after learning about Team Topologies. DDD, on the other hand, seems to be creating 10 different mental models for 10 different readers. Instead of being common ground, it becomes a battleground for unnecessary debates.
+Team Topologies는 팀 간 인지 부하를 분산하는 데 훨씬 더 쉽고 좋은 프레임워크를 제공합니다. 엔지니어들은 Team Topologies를 배우면 비슷한 정신 모델을 갖게 되지만, DDD는 10명이 읽으면 10가지 다른 정신 모델이 생깁니다. 공통 기반이 아니라, 불필요한 논쟁의 장이 되는 셈이죠.
 
 ## 예시
 - 우리의 아키텍처는 표준 CRUD 앱 아키텍처, [Postgres 위에 파이썬 모놀리식](https://danluu.com/simple-architectures/)
@@ -307,7 +307,7 @@ Team Topologies provides a much better, easier to understand framework that help
 - "와, 이 사람들 진짜 똑똑하다" 싶었던 회사들은 [대부분 실패했다](https://kenkantzer.com/learnings-from-5-years-of-tech-startup-code-audits/)
 - 시스템 전체를 연결하는 하나의 함수. 시스템이 어떻게 동작하는지 알고 싶으면 [이걸 읽어라](https://www.infoq.com/presentations/8-lines-code-refactoring)
 
-These architectures are quite boring and easy to understand. Anyone can grasp them without much mental effort.
+이런 아키텍처들은 꽤 지루하고, 이해하기 쉽습니다. 누구나 큰 정신적 노력 없이 파악할 수 있습니다.
 
 주니어 개발자를 아키텍처 리뷰에 참여시키세요. 이들이 정신적으로 부담스러운 부분을 잘 집어냅니다.
 
@@ -366,7 +366,7 @@ These architectures are quite boring and easy to understand. Anyone can grasp th
     <p>불필요한 추상화를 피하라는 조언도 정말 공감됩니다. 브라우저 개발에서는 신규 기여자가 쉽게 접근할 수 있도록 하면서도, 웹 표준과 호환성이라는 본질적 복잡성을 다뤄야 합니다.</p>
     <p>복잡한 시스템에서도, 때로는 가장 단순한 해법이 최선입니다.</p>
     <p><strong><a href="https://x.com/antirez" target="_blank">antirez</a></strong> <i>(Redis)</i><br>전적으로 동의합니다 :) "A Philosophy of Software Design"에서 빠진 개념이 하나 있다면 "디자인 희생(design sacrifice)"입니다. 때로는 무언가를 희생함으로써 단순함이나 성능, 혹은 둘 다를 얻을 수 있습니다. 저는 이 아이디어를 항상 적용하지만, 종종 이해받지 못합니다.</p>
-    <p>A good example is the fact that I always refused to have hash items expires. This is a design sacrifice because if you have certain attributes only in the top-level items (the keys themselves), the design is simpler, values will just be objects. When Redis got hash expires, it was a nice feature but required (indeed) many changes to many parts, raising the complexity.</p>
-    <p>Another example is what I'm doing right now, Vector Sets, the new Redis data type. I decided that Redis would not be the source of truth about vectors, but that it can just take an approximate version of them, so I was able to do on-insert normalization, quantization without trying to retain the large floats vector on disk, and so forth. May vector DBs don't sacrifice the fact of remembering what the user put inside (the full precision vector).</p>
-    <p>These are just two random examples, but I apply this idea everywhere. Now the thing is: of course one must sacrifice the right things. Often, there are 5% features that account for a very large amount of complexity: that is a good thing to kill :D</p>
+    <p>예를 들어, 저는 항상 해시 아이템 만료(hash expires)를 거부해왔습니다. 이는 디자인 희생입니다. 최상위 아이템(키)에만 특정 속성이 있으면, 설계가 더 단순해지고 값은 그냥 객체가 됩니다. Redis에 해시 만료가 도입되자, 많은 부분이 바뀌었고 복잡성이 증가했습니다.</p>
+    <p>지금 하고 있는 Vector Sets(새로운 Redis 데이터 타입)도 마찬가지입니다. Redis가 벡터의 진실을 보장하지 않고, 근사값만 저장하도록 했습니다. 덕분에 삽입 시 정규화, 양자화 등을 쉽게 할 수 있었고, 큰 부동소수점 벡터를 디스크에 남기지 않아도 됐죠. 많은 벡터 DB는 사용자가 넣은 값을 그대로 기억하려고 합니다(풀 프리시전 벡터).</p>
+    <p>이건 두 가지 예일 뿐이고, 저는 어디서나 이 아이디어를 적용합니다. 물론, 올바른 것을 희생해야 합니다. 종종 5%의 기능이 전체 복잡성의 대부분을 차지합니다. 그런 건 과감히 버리는 게 좋죠 :D</p>
 </details>
