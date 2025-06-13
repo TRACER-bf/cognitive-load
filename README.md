@@ -197,72 +197,71 @@ P.S. 너무 많은 책임을 가진 비대한 God 객체를 옹호하는 것이 
   <p>글쓴이: <a href="https://0xd34df00d.me" target="_blank">0xd34df00d</a></p>
 </details>
 
-## Business logic and HTTP status codes
-On the backend we return:  
-`401` for expired jwt token  
-`403` for not enough access  
-`418` for banned users  
+## 비즈니스 로직과 HTTP 상태 코드
+백엔드에서 다음과 같이 반환한다고 해봅시다:  
+`401` - 만료된 jwt 토큰  
+`403` - 접근 권한 부족  
+`418` - 차단된 사용자  
 
-The engineers on the frontend use backend API to implement login functionality. They would have to temporarily create the following cognitive load in their brains:  
-`401` is for expired jwt token // `🧠+`, ok just temporary remember it  
-`403` is for not enough access // `🧠++`  
-`418` is for banned users // `🧠+++`  
+프론트엔드 개발자는 백엔드 API를 사용해 로그인 기능을 구현합니다. 이때 다음과 같은 인지 부하를 임시로 머릿속에 담아야 합니다:  
+`401`은 만료된 jwt 토큰 // `🧠+`, 잠깐 기억해야 함  
+`403`은 권한 부족 // `🧠++`  
+`418`은 차단된 사용자 // `🧠+++`  
 
-Frontend developers would (hopefully) introduce some kind `numeric status -> meaning` dictionary on their side, so that subsequent generations of contributors wouldn't have to recreate this mapping in their brains.
+프론트엔드 개발자는 (아마도) `숫자 상태 -> 의미` 사전을 도입해, 이후 기여자들이 이 매핑을 다시 머릿속에 담지 않아도 되게 할 것입니다.
 
-Then QA engineers come into play:
-"Hey, I got `403` status, is that expired token or not enough access?"
-**QA engineers can't jump straight to testing, because first they have to recreate the cognitive load that the engineers on the backend once created.**
+이제 QA 엔지니어가 등장합니다:
+"403 상태가 나왔는데, 이게 토큰 만료인지 권한 부족인지?"
+**QA 엔지니어는 바로 테스트에 들어갈 수 없습니다. 먼저 백엔드 개발자가 만든 인지 부하를 다시 머릿속에 쌓아야 하니까요.**
 
-Why hold this custom mapping in our working memory? It's better to abstract away your business details from the HTTP transfer protocol, and return self-descriptive codes directly in the response body:
+왜 이런 커스텀 매핑을 작업 기억에 담아야 할까요? 비즈니스 세부사항을 HTTP 전송 프로토콜에서 분리하고, 응답 본문에 자기 설명적인 코드를 직접 반환하는 것이 더 낫습니다:
 ```json
 {
     "code": "jwt_has_expired"
 }
 ```
 
-Cognitive load on the frontend side: `🧠` (fresh, no facts are held in mind)  
-Cognitive load on the QA side: `🧠`
+프론트엔드의 인지 부하: `🧠` (신선, 아무것도 기억할 필요 없음)  
+QA의 인지 부하: `🧠`
 
-The same rule applies to all sorts of numeric statuses (in the database or wherever) - **prefer self-describing strings**. We are not in the era of 640K computers to optimise for memory.  
+이 규칙은 모든 숫자 상태(데이터베이스 등)에도 적용됩니다. **자기 설명적인 문자열을 선호하세요.** 우리는 더 이상 640K 컴퓨터 시절처럼 메모리를 아껴야 하는 시대가 아닙니다.
 
-> People spend time arguing between `401` and `403`, making decisions based on their own mental models. New developers are coming in, and they need to recreate that thought process. You may have documented the "whys" (ADRs) for your code, helping newcomers to understand the decisions made. But in the end it just doesn't make any sense. We can separate errors into either user-related or server-related, but apart from that, things are kind of blurry. 
+> 사람들은 `401`과 `403` 사이에서 논쟁하며, 각자의 정신 모델에 따라 결정을 내립니다. 새로운 개발자가 들어오면, 그 사고 과정을 다시 재현해야 합니다. "왜"를 문서화(ADR 등)해도, 결국 별 의미가 없습니다. 에러는 사용자 관련/서버 관련으로만 구분하면 충분하고, 그 외에는 애매합니다.
 
-P.S. It's often mentally taxing to distinguish between "authentication" and "authorization". We can use simpler terms like ["login" and "permissions"](https://ntietz.com/blog/lets-say-instead-of-auth/) to reduce the cognitive load.
+P.S. "인증"과 "인가"를 구분하는 것도 정신적으로 부담스럽습니다. ["로그인"과 "권한" 같은 더 쉬운 용어](https://ntietz.com/blog/lets-say-instead-of-auth/)를 쓰면 인지 부하를 줄일 수 있습니다.
 
-## Abusing DRY principle
+## DRY 원칙의 남용
+Do not repeat yourself(자기복제 금지)는 소프트웨어 엔지니어가 처음 배우는 원칙 중 하나입니다. 너무 깊이 내재화되어, 몇 줄이라도 중복되는 걸 참지 못합니다. 물론 좋은 원칙이지만, 남용하면 감당할 수 없는 인지 부하를 초래합니다.
 
-Do not repeat yourself - that is one of the first principles you are taught as a software engineer. It is so deeply embedded in ourselves that we can not stand the fact of a few extra lines of code. Although in general a good and fundamental rule, when overused it leads to the cognitive load we can not handle.
+요즘은 모두 논리적으로 분리된 컴포넌트로 소프트웨어를 만듭니다. 이 컴포넌트들은 종종 여러 코드베이스(별도 서비스)로 분산됩니다. 반복을 없애려다 보면, 관련 없는 컴포넌트끼리 강하게 결합될 수 있습니다. 그 결과, 한 부분의 변경이 다른 곳에 의도치 않은 영향을 미치기도 하고, 개별 컴포넌트를 교체/수정하기도 어려워집니다. `🤯`
 
-Nowadays, everyone builds software based on logically separated components. Often those are distributed among multiple codebases representing separate services. When you strive to eliminate any repetition, you might end up creating tight coupling between unrelated components. As a result changes in one part may have unintended consequences in other seemingly unrelated areas. It can also hinder the ability to replace or modify individual components without impacting the entire system. `🤯`  
+사실, 단일 모듈 내에서도 같은 문제가 발생합니다. 장기적으로는 비슷하지 않을 수도 있는 부분을 너무 일찍 추상화하면, 수정/확장하기 어려운 불필요한 추상화가 생깁니다.
 
-In fact, the same problem arises even within a single module. You might extract common functionality too early, based on perceived similarities that might not actually exist in the long run. This can result in unnecessary abstractions that are difficult to modify or extend.  
+Rob Pike는 이렇게 말했습니다:
 
-Rob Pike once said:
+> 약간의 복사본이 약간의 의존성보다 낫다.
 
-> A little copying is better than a little dependency.  
+우리는 바퀴를 다시 만들지 않으려는 유혹에 빠져, 작은 함수 하나 쓰려고 무거운 라이브러리를 가져오기도 합니다.
 
-We are tempted to not reinvent the wheel so strong that we are ready to import large, heavy libraries to use a small function that we could easily write by ourselves.  
+**모든 의존성은 곧 내 코드입니다.** 외부 라이브러리의 10단계 이상 스택 트레이스를 따라가며 문제를 파악하는 건 고통스럽습니다. (문제는 반드시 생깁니다)
 
-**All your dependencies are your code.** Going through 10+ levels of stack trace of some imported library and figuring out what went wrong (*because things go wrong*) is painful.  
+## 프레임워크에 대한 과도한 의존
+프레임워크에는 많은 "마법"이 숨어 있습니다. 프레임워크에 너무 의존하면, **모든 신규 개발자가 그 "마법"부터 배워야 합니다.** 몇 달이 걸릴 수도 있습니다. 프레임워크 덕분에 MVP를 며칠 만에 만들 수 있지만, 장기적으로는 불필요한 복잡성과 인지 부하를 더하게 됩니다.
 
-## Tight coupling with a framework
-There's a lot of "magic" in frameworks. By relying too heavily on a framework, **we force all upcoming developers to learn that "magic" first**. It can take months. Even though frameworks enable us to launch MVPs in a matter of days, in the long run they tend to add unnecessary complexity and cognitive load.
+더 나쁜 건, 새로운 요구사항이 기존 아키텍처에 맞지 않을 때 프레임워크가 큰 제약이 된다는 점입니다. 이때부터는 프레임워크를 포크해서 커스텀 버전을 유지하게 되죠. 신규 입사자가 가치를 더하려면(=이 커스텀 프레임워크를 배워야 하니) 엄청난 인지 부하를 쌓아야 합니다. `🤯`
 
-Worse yet, at some point frameworks can become a significant constraint when faced with a new requirement that just doesn't fit the architecture. From here onwards people end up forking a framework and maintaining their own custom version. Imagine the amount of cognitive load a newcomer would have to build (i.e. learn this custom framework) in order to deliver any value. `🤯`
+**모든 걸 처음부터 만들자는 얘기는 아닙니다!**
 
-**By no means do we advocate to invent everything from scratch!**
-
-We can write code in a somewhat framework-agnostic way. The business logic should not reside within a framework; rather, it should use the framework's components. Put a framework outside of your core logic. Use the framework in a library-like fashion. This would allow new contributors to add value from day one, without the need of going through debris of framework-related complexity first.  
+프레임워크에 종속되지 않는 방식으로 코드를 작성할 수 있습니다. 비즈니스 로직은 프레임워크 내부가 아니라, 프레임워크의 컴포넌트를 활용하는 쪽에 있어야 합니다. 프레임워크를 핵심 로직의 바깥에 두고, 라이브러리처럼 사용하세요. 이렇게 하면 신규 기여자도 프레임워크의 복잡성을 파헤치지 않고 바로 가치를 더할 수 있습니다.
 
 > [Why I Hate Frameworks](https://minds.md/benji/frameworks)
 
-## Layered architecture
-There is a certain engineering excitement about all this stuff.
+## 레이어드 아키텍처
+이런 것들에 대해 엔지니어로서 흥분을 느끼기도 합니다.
 
-I myself was a passionate advocate of Hexagonal/Onion Architecture for years. I used it here and there and encouraged other teams to do so. The complexity of our projects went up, the sheer number of files alone had doubled. It felt like we were writing a lot of glue code. On ever changing requirements we had to make changes across multiple layers of abstractions, it all became tedious. `🤯`
+저 역시 수년간 헥사고날/어니언 아키텍처의 열렬한 옹호자였습니다. 여기저기 적용했고, 다른 팀에도 권장했습니다. 프로젝트의 복잡성은 올라가고, 파일 수만 두 배가 됐습니다. 글루 코드만 잔뜩 쓰는 느낌이었죠. 요구사항이 바뀔 때마다 여러 추상화 레이어를 수정해야 했고, 점점 지루해졌습니다. `🤯`
 
-Abstraction is supposed to hide complexity, here it just adds [indirection](https://fhur.me/posts/2024/thats-not-an-abstraction). Jumping from call to call to read along and figure out what goes wrong and what is missing is a vital requirement to quickly solve a problem. With this architecture's layer uncoupling it requires an exponential factor of extra, often disjointed, traces to get to the point where the failure occurs. Every such trace takes space in our limited working memory. `🤯`  
+Abstraction은 복잡성을 숨기기 위한 것인데, 여기서는 [indirection](https://fhur.me/posts/2024/thats-not-an-abstraction)만 더해집니다. 문제의 원인과 누락된 부분을 파악하려면 호출을 따라가야 하는데, 이 아키텍처에서는 레이어가 분리되어 있어, 실패 지점을 찾으려면 여러 번의, 종종 단절된 추적이 필요합니다. 이런 추적 하나하나가 우리의 제한된 작업 기억을 차지합니다. `🤯`
 
 This architecture was something that made intuitive sense at first, but every time we tried applying it to projects it made a lot more harm than good. In the end, we gave it all up in favour of the good old dependency inversion principle. **No port/adapter terms to learn, no unnecessary layers of horizontal abstractions, no extraneous cognitive load.**
 
@@ -272,16 +271,16 @@ This architecture was something that made intuitive sense at first, but every ti
   <a href="https://twitter.com/flaviocopes">@flaviocopes</a>
 </details>
 
-If you think that such layering will allow you to quickly replace a database or other dependencies, you're mistaken. Changing the storage causes lots of problems, and believe us, having some abstractions for the data access layer is the least of your worries. At best, abstractions can save somewhat 10% of your migration time (if any), the real pain is in data model incompatibilities, communication protocols, distributed systems challenges, and [implicit interfaces](https://www.hyrumslaw.com).  
+If you think that such layering will allow you to quickly replace a database or other dependencies, you're mistaken. Changing the storage causes lots of problems, and believe us, having some abstractions for the data access layer is the least of your worries. At best, abstractions can save somewhat 10% of your migration time (if any), the real pain is in data model incompatibilities, communication protocols, distributed systems challenges, and [implicit interfaces](https://www.hyrumslaw.com).
 
-> With a sufficient number of users of an API,  
-> it does not matter what you promise in the contract:  
-> all observable behaviors of your system  
+> With a sufficient number of users of an API,
+> it does not matter what you promise in the contract:
+> all observable behaviors of your system
 > will be depended on by somebody.
 
-We did a storage migration, and that took us about 10 months. The old system was single-threaded, so the exposed events were sequential. All our systems depended on that observed behaviour. This behavior was not part of the API contract, it was not reflected in the code. A new distributed storage didn't have that guarantee - the events came out-of-order. We spent only a few hours coding a new storage adapter, thanks to an abstraction. **We spent the next 10 months on dealing with out-of-order events and other challenges.** It's now funny to say that abstractions helps us replace components quickly.  
+We did a storage migration, and that took us about 10 months. The old system was single-threaded, so the exposed events were sequential. All our systems depended on that observed behaviour. This behavior was not part of the API contract, it was not reflected in the code. A new distributed storage didn't have that guarantee - the events came out-of-order. We spent only a few hours coding a new storage adapter, thanks to an abstraction. **We spent the next 10 months on dealing with out-of-order events and other challenges.** It's now funny to say that abstractions helps us replace components quickly.
 
-**So, why pay the price of high cognitive load for such a layered architecture, if it doesn't pay off in the future?** Plus, in most cases, that future of replacing some core component never happens.  
+**So, why pay the price of high cognitive load for such a layered architecture, if it doesn't pay off in the future?** Plus, in most cases, that future of replacing some core component never happens.
 
 These architectures are not fundamental, they are just subjective, biased consequences of more fundamental principles. Why rely on those subjective interpretations? Follow the fundamental rules instead: dependency inversion principle, single source of truth, cognitive load and information hiding. Your business logic should not depend on low-level modules like database, UI or framework. We should be able to write tests for our core logic without worrying about the infrastructure, and that's it. [Discuss](https://github.com/zakirullin/cognitive-load/discussions/24).
 
@@ -296,11 +295,11 @@ Do not add layers of abstractions for the sake of an architecture. Add them when
 ## Domain-driven design
 Domain-driven design has some great points, although it is often misinterpreted. People say "We write code in DDD", which is a bit strange, because DDD is about problem space, not about solution space.
 
-Ubiquitous language, domain, bounded context, aggregate, event storming are all about problem space. They are meant to help us learn the insights about the domain and extract the boundaries. DDD enables developers, domain experts and business people to communicate effectively using a single, unified language. Rather than focusing on these problem space aspects of DDD, we tend to emphasise particular folder structures, services, repositories, and other solution space techniques. 
+Ubiquitous language, domain, bounded context, aggregate, event storming are all about problem space. They are meant to help us learn the insights about the domain and extract the boundaries. DDD enables developers, domain experts and business people to communicate effectively using a single, unified language. Rather than focusing on these problem space aspects of DDD, we tend to emphasise particular folder structures, services, repositories, and other solution space techniques.
 
-Chances are that the way we interpret DDD is likely to be unique and subjective. And if we build code upon this understanding, i.e., if we create a lot of extraneous cognitive load - future developers are doomed. `🤯`  
+Chances are that the way we interpret DDD is likely to be unique and subjective. And if we build code upon this understanding, i.e., if we create a lot of extraneous cognitive load - future developers are doomed. `🤯`
 
-Team Topologies provides a much better, easier to understand framework that helps us split the cognitive load across teams. Engineers tend to develop somewhat similar mental models after learning about Team Topologies. DDD, on the other hand, seems to be creating 10 different mental models for 10 different readers. Instead of being common ground, it becomes a battleground for unnecessary debates.  
+Team Topologies provides a much better, easier to understand framework that helps us split the cognitive load across teams. Engineers tend to develop somewhat similar mental models after learning about Team Topologies. DDD, on the other hand, seems to be creating 10 different mental models for 10 different readers. Instead of being common ground, it becomes a battleground for unnecessary debates.
 
 ## Examples
 - Our architecture is a standard CRUD app architecture, [a Python monolith on top of Postgres](https://danluu.com/simple-architectures/)
@@ -314,25 +313,25 @@ Involve junior developers in architecture reviews. They will help you to identif
 
 ## Cognitive load in familiar projects
 
-> The problem is that **familiarity is not the same as simplicity**. They *feel* the same — that same ease of moving through a space without much mental effort — but for very different reasons. Every "clever" (read: "self-indulgent") and non-idiomatic trick you use incurs a learning penalty for everyone else. Once they have done that learning, then they will find working with the code less difficult. So it is hard to recognise how to simplify code that you are already familiar with. This is why I try to get "the new kid" to critique the code before they get too institutionalised!  
+> The problem is that **familiarity is not the same as simplicity**. They *feel* the same — that same ease of moving through a space without much mental effort — but for very different reasons. Every "clever" (read: "self-indulgent") and non-idiomatic trick you use incurs a learning penalty for everyone else. Once they have done that learning, then they will find working with the code less difficult. So it is hard to recognise how to simplify code that you are already familiar with. This is why I try to get "the new kid" to critique the code before they get too institutionalised!
 >
-> It is likely that the previous author(s) created this huge mess one tiny increment at a time, not all at once. So you are the first person who has ever had to try to make sense of it all at once.  
+> It is likely that the previous author(s) created this huge mess one tiny increment at a time, not all at once. So you are the first person who has ever had to try to make sense of it all at once.
 >
-> In my class I describe a sprawling SQL stored procedure we were looking at one day, with hundreds of lines of conditionals in a huge WHERE clause. Someone asked how anyone could have let it get this bad. I told them: "When there are only 2 or 3 conditionals, adding another one doesn't make any difference. By the time there are 20 or 30 conditionals, adding another one doesn't make any difference!"  
+> In my class I describe a sprawling SQL stored procedure we were looking at one day, with hundreds of lines of conditionals in a huge WHERE clause. Someone asked how anyone could have let it get this bad. I told them: "When there are only 2 or 3 conditionals, adding another one doesn't make any difference. By the time there are 20 or 30 conditionals, adding another one doesn't make any difference!"
 >
-> There is no "simplifying force" acting on the code base other than deliberate choices that you make. Simplifying takes effort, and people are too often in a hurry.  
+> There is no "simplifying force" acting on the code base other than deliberate choices that you make. Simplifying takes effort, and people are too often in a hurry.
 >
-> *Thanks to [Dan North](https://dannorth.net) for his comment*.  
+> *Thanks to [Dan North](https://dannorth.net) for his comment*.
 
-If you've internalized the mental models of the project into your long-term memory, you won't experience a high cognitive load.  
+If you've internalized the mental models of the project into your long-term memory, you won't experience a high cognitive load.
 
 <div align="center">
   <img src="/img/mentalmodelsv15.png" alt="Mental models" width="700">
 </div>
 
-The more mental models there are to learn, the longer it takes for a new developer to deliver value.  
+The more mental models there are to learn, the longer it takes for a new developer to deliver value.
 
-Once you onboard new people on your project, try to measure the amount of confusion they have (pair programming may help). If they're confused for more than ~40 minutes in a row - you've got things to improve in your code.  
+Once you onboard new people on your project, try to measure the amount of confusion they have (pair programming may help). If they're confused for more than ~40 minutes in a row - you've got things to improve in your code.
 
 If you keep the cognitive load low, people can contribute to your codebase within the first few hours of joining your company.
 
@@ -345,7 +344,7 @@ Do you feel it? Not only do you have to jump all over the article to get the mea
   <img src="/img/smartauthorv14thanksmari.png" alt="Smart author" width="600">
 </div>
 
-We should reduce any cognitive load above and beyond what is intrinsic to the work we do. 
+We should reduce any cognitive load above and beyond what is intrinsic to the work we do.
 
 ---
 [LinkedIn](https://www.linkedin.com/in/zakirullin/), [X](https://twitter.com/zakirullin), [GitHub](https://github.com/zakirullin)
