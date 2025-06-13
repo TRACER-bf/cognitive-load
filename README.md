@@ -252,7 +252,7 @@ Rob Pike는 이렇게 말했습니다:
 
 **모든 걸 처음부터 만들자는 얘기는 아닙니다!**
 
-프레임워크에 종속되지 않는 방식으로 코드를 작성할 수 있습니다. 비즈니스 로직은 프레임워크 내부가 아니라, 프레임워크의 컴포넌트를 활용하는 쪽에 있어야 합니다. 프레임워크를 핵심 로직의 바깥에 두고, 라이브러리처럼 사용하세요. 이렇게 하면 신규 기여자도 프레임워크의 복잡성을 파헤치지 않고 바로 가치를 더할 수 있습니다.
+프레임워크에 종속되지 않는 방식으로 코드를 작성할 수 있습니다. 비즈니스 로직은 프레임워크의 컴포넌트를 활용하는 쪽에 있어야 합니다. 프레임워크를 핵심 로직의 바깥에 두고, 라이브러리처럼 사용하세요. 이렇게 하면 신규 기여자도 프레임워크의 복잡성을 파헤치지 않고 바로 가치를 더할 수 있습니다.
 
 > [Why I Hate Frameworks](https://minds.md/benji/frameworks)
 
@@ -261,12 +261,12 @@ Rob Pike는 이렇게 말했습니다:
 
 저 역시 수년간 헥사고날/어니언 아키텍처의 열렬한 옹호자였습니다. 여기저기 적용했고, 다른 팀에도 권장했습니다. 프로젝트의 복잡성은 올라가고, 파일 수만 두 배가 됐습니다. 글루 코드만 잔뜩 쓰는 느낌이었죠. 요구사항이 바뀔 때마다 여러 추상화 레이어를 수정해야 했고, 점점 지루해졌습니다. `🤯`
 
-Abstraction은 복잡성을 숨기기 위한 것인데, 여기서는 [indirection](https://fhur.me/posts/2024/thats-not-an-abstraction)만 더해집니다. 문제의 원인과 누락된 부분을 파악하려면 호출을 따라가야 하는데, 이 아키텍처에서는 레이어가 분리되어 있어, 실패 지점을 찾으려면 여러 번의, 종종 단절된 추적이 필요합니다. 이런 추적 하나하나가 우리의 제한된 작업 기억을 차지합니다. `🤯`
+Abstraction은 복잡성을 숨기기 위한 것인데, 여기서는 [간접화(indirection)](https://fhur.me/posts/2024/thats-not-an-abstraction)만 더해집니다. 문제의 원인과 누락된 부분을 파악하려면 호출을 따라가야 하는데, 이 아키텍처에서는 레이어가 분리되어 있어, 실패 지점을 찾으려면 여러 번의, 종종 단절된 추적이 필요합니다. 이런 추적 하나하나가 우리의 제한된 작업 기억을 차지합니다. `🤯`
 
 This architecture was something that made intuitive sense at first, but every time we tried applying it to projects it made a lot more harm than good. In the end, we gave it all up in favour of the good old dependency inversion principle. **No port/adapter terms to learn, no unnecessary layers of horizontal abstractions, no extraneous cognitive load.**
 
 <details>
-  <summary><b>Coding principles and experience</b></summary>
+  <summary><b>코딩 원칙과 경험</b></summary>
   <img src="img/complexity.png"><br>
   <a href="https://twitter.com/flaviocopes">@flaviocopes</a>
 </details>
@@ -292,7 +292,7 @@ Do not add layers of abstractions for the sake of an architecture. Add them when
   <img src="/img/layers.png" alt="Layers" width="400">
 </div>
 
-## Domain-driven design
+## 도메인 주도 설계(DDD)
 Domain-driven design has some great points, although it is often misinterpreted. People say "We write code in DDD", which is a bit strange, because DDD is about problem space, not about solution space.
 
 Ubiquitous language, domain, bounded context, aggregate, event storming are all about problem space. They are meant to help us learn the insights about the domain and extract the boundaries. DDD enables developers, domain experts and business people to communicate effectively using a single, unified language. Rather than focusing on these problem space aspects of DDD, we tend to emphasise particular folder structures, services, repositories, and other solution space techniques.
@@ -301,71 +301,71 @@ Chances are that the way we interpret DDD is likely to be unique and subjective.
 
 Team Topologies provides a much better, easier to understand framework that helps us split the cognitive load across teams. Engineers tend to develop somewhat similar mental models after learning about Team Topologies. DDD, on the other hand, seems to be creating 10 different mental models for 10 different readers. Instead of being common ground, it becomes a battleground for unnecessary debates.
 
-## Examples
-- Our architecture is a standard CRUD app architecture, [a Python monolith on top of Postgres](https://danluu.com/simple-architectures/)
-- How Instagram scaled to 14 million users with [only 3 engineers](https://read.engineerscodex.com/p/how-instagram-scaled-to-14-million)
-- The companies where we were like "woah, these folks are [smart as hell](https://kenkantzer.com/learnings-from-5-years-of-tech-startup-code-audits/)") for the most part failed
-- One function that wires up the entire system. If you want to know how the system works - [go read it](https://www.infoq.com/presentations/8-lines-code-refactoring)
+## 예시
+- 우리의 아키텍처는 표준 CRUD 앱 아키텍처, [Postgres 위에 파이썬 모놀리식](https://danluu.com/simple-architectures/)
+- 인스타그램이 [단 3명의 엔지니어로 1,400만 명의 사용자를 확장한 방법](https://read.engineerscodex.com/p/how-instagram-scaled-to-14-million)
+- "와, 이 사람들 진짜 똑똑하다" 싶었던 회사들은 [대부분 실패했다](https://kenkantzer.com/learnings-from-5-years-of-tech-startup-code-audits/)
+- 시스템 전체를 연결하는 하나의 함수. 시스템이 어떻게 동작하는지 알고 싶으면 [이걸 읽어라](https://www.infoq.com/presentations/8-lines-code-refactoring)
 
 These architectures are quite boring and easy to understand. Anyone can grasp them without much mental effort.
 
-Involve junior developers in architecture reviews. They will help you to identify the mentally demanding areas.
+주니어 개발자를 아키텍처 리뷰에 참여시키세요. 이들이 정신적으로 부담스러운 부분을 잘 집어냅니다.
 
-## Cognitive load in familiar projects
+## 익숙한 프로젝트에서의 인지 부하
 
-> The problem is that **familiarity is not the same as simplicity**. They *feel* the same — that same ease of moving through a space without much mental effort — but for very different reasons. Every "clever" (read: "self-indulgent") and non-idiomatic trick you use incurs a learning penalty for everyone else. Once they have done that learning, then they will find working with the code less difficult. So it is hard to recognise how to simplify code that you are already familiar with. This is why I try to get "the new kid" to critique the code before they get too institutionalised!
+> **익숙함은 단순함과 다릅니다.** 둘 다 별다른 정신적 노력 없이 공간을 이동하는 것 같은 느낌을 주지만, 그 이유는 완전히 다릅니다. 여러분이 쓰는 모든 "영리한"(즉, 자기만족적인) 비표준 트릭은 다른 모두에게 학습 비용을 부과합니다. 그 학습을 마치면 코드를 다루기 쉬워지지만, 이미 익숙해진 코드를 어떻게 단순화할지 파악하는 건 어렵습니다. 그래서 저는 "신입"이 너무 익숙해지기 전에 코드를 비판하게 합니다!
 >
-> It is likely that the previous author(s) created this huge mess one tiny increment at a time, not all at once. So you are the first person who has ever had to try to make sense of it all at once.
+> 이전 작성자들은 이 거대한 혼란을 한 번에 만든 게 아니라, 아주 작은 단위로 조금씩 만들었을 가능성이 높습니다. 그래서 여러분이 처음으로 전체를 한 번에 이해해야 하는 사람이 되는 겁니다.
 >
-> In my class I describe a sprawling SQL stored procedure we were looking at one day, with hundreds of lines of conditionals in a huge WHERE clause. Someone asked how anyone could have let it get this bad. I told them: "When there are only 2 or 3 conditionals, adding another one doesn't make any difference. By the time there are 20 or 30 conditionals, adding another one doesn't make any difference!"
+> 제 수업에서, 수백 줄의 조건문이 있는 거대한 WHERE 절을 가진 SQL 저장 프로시저를 본 적이 있습니다. 누군가 "어떻게 이렇게까지 됐을까?"라고 물었죠. 저는 "조건이 2~3개일 때 하나 더 추가해도 별 차이 없습니다. 20~30개가 되면 하나 더 추가해도 별 차이 없습니다!"라고 답했습니다.
 >
-> There is no "simplifying force" acting on the code base other than deliberate choices that you make. Simplifying takes effort, and people are too often in a hurry.
+> 의도적인 선택 외에는 코드베이스에 작용하는 "단순화 힘"이 없습니다. 단순화에는 노력이 필요하고, 사람들은 너무 자주 서두릅니다.
 >
-> *Thanks to [Dan North](https://dannorth.net) for his comment*.
+> *Dan North의 코멘트에 감사드립니다.*
 
-If you've internalized the mental models of the project into your long-term memory, you won't experience a high cognitive load.
+프로젝트의 정신 모델을 장기 기억에 내재화했다면, 높은 인지 부하를 느끼지 않을 것입니다.
 
 <div align="center">
   <img src="/img/mentalmodelsv15.png" alt="Mental models" width="700">
 </div>
 
-The more mental models there are to learn, the longer it takes for a new developer to deliver value.
+배워야 할 정신 모델이 많을수록, 신규 개발자가 가치를 더하는 데 시간이 오래 걸립니다.
 
-Once you onboard new people on your project, try to measure the amount of confusion they have (pair programming may help). If they're confused for more than ~40 minutes in a row - you've got things to improve in your code.
+신규 인력을 온보딩할 때, 그들이 얼마나 혼란스러워하는지(페어 프로그래밍이 도움이 될 수 있음) 측정해보세요. 40분 이상 연속으로 혼란스러워한다면, 코드에 개선할 부분이 있다는 뜻입니다.
 
-If you keep the cognitive load low, people can contribute to your codebase within the first few hours of joining your company.
+인지 부하를 낮게 유지하면, 입사 첫날 몇 시간 만에 누구나 코드베이스에 기여할 수 있습니다.
 
-## Conclusion
-Imagine for a moment that what we inferred in the second chapter isn't actually true. If that's the case, then the conclusion we just negated, along with the conclusions in the previous chapter that we had accepted as valid, might not be correct either. `🤯`
+## 결론
+2장에서 도출한 결론이 사실이 아니라고 잠시 상상해봅시다. 그렇다면 방금 부정한 결론과, 이전 장에서 유효하다고 받아들였던 결론들 역시 맞지 않을 수 있습니다. `🤯`
 
-Do you feel it? Not only do you have to jump all over the article to get the meaning (shallow modules!), but the paragraph in general is difficult to understand. We have just created an unnecessary cognitive load in your head. **Do not do this to your colleagues.**
+느껴지시나요? 의미를 파악하려면 글 전체를 이리저리 뛰어다녀야 하고(얕은 모듈!), 문단 자체도 이해하기 어렵습니다. 여러분의 머릿속에 불필요한 인지 부하를 만들어낸 셈입니다. **동료에게 이런 짓은 하지 마세요.**
 
 <div align="center">
   <img src="/img/smartauthorv14thanksmari.png" alt="Smart author" width="600">
 </div>
 
-We should reduce any cognitive load above and beyond what is intrinsic to the work we do.
+우리는 본질적인 작업 외의 모든 인지 부하는 줄여야 합니다.
 
 ---
 [LinkedIn](https://www.linkedin.com/in/zakirullin/), [X](https://twitter.com/zakirullin), [GitHub](https://github.com/zakirullin)
 
-[Readable version](https://minds.md/zakirullin/cognitive)
+[가독성 좋은 버전](https://minds.md/zakirullin/cognitive)
 
 <details>
-    <summary><b>Comments</b></summary>
+    <summary><b>댓글</b></summary>
     <br>
-    <p><strong>Rob Pike</strong><br>Nice article.</p>
-    <p><strong><a href="https://x.com/karpathy/status/1872038630405054853" target="_blank">Andrej Karpathy</a></strong> <i>(ChatGPT, Tesla)</i><br>Nice post on software engineering. Probably the most true, least practiced viewpoint.</p>
-    <p><strong><a href="https://x.com/elonmusk/status/1872346903792566655" target="_blank">Elon Musk</a></strong><br>True.</p>
-    <p><strong><a href="https://www.linkedin.com/feed/update/urn:li:activity:7277757844970520576/" target="_blank">Addy Osmani</a></strong> <i>(Chrome, the most complex software system in the world)</i><br>I've seen countless projects where smart developers created impressive architectures using the latest design patterns and microservices. But when new team members tried to make changes, they spent weeks just trying to understand how everything fits together. The cognitive load was so high that productivity plummeted and bugs multiplied.</p>
-    <p>The irony? Many of these complexity-inducing patterns were implemented in the name of "clean code."</p>
-    <p>What really matters is reducing unnecessary cognitive burden. Sometimes this means fewer, deeper modules instead of many shallow ones. Sometimes it means keeping related logic together instead of splitting it into tiny functions.</p>
-    <p>And sometimes it means choosing boring, straightforward solutions over clever ones. The best code isn't the most elegant or sophisticated - it's the code that future developers (including yourself) can understand quickly.</p>
-    <p>Your article really resonates with the challenges we face in browser development. You're absolutely right about modern browsers being among the most complex software systems. Managing that complexity in Chromium is a constant challenge that aligns perfectly with many of the points you made about cognitive load.</p>
-    <p>One way we try to handle this in Chromium is through careful component isolation and well-defined interfaces between subsystems (like rendering, networking, JavaScript execution, etc.). Similar to your deep modules example with Unix I/O - we aim for powerful functionality behind relatively simple interfaces. For instance, our rendering pipeline handles incredible complexity (layout, compositing, GPU acceleration) but developers can interact with it through clear abstraction layers.</p>
-    <p>Your points about avoiding unnecessary abstractions really hit home too. In browser development, we constantly balance between making the codebase approachable for new contributors while handling the inherent complexity of web standards and compatibility. </p>
-    <p>Sometimes the simplest solution is the best one, even in a complex system.</p>
-    <p><strong><a href="https://x.com/antirez" target="_blank">antirez</a></strong> <i>(Redis)</i><br>Totally agree about it :) Also, what I believe is missing from mentioned "A Philosophy of Software Design" is the concept of "design sacrifice". That is, sometimes you sacrifice something and get back simplicity, or performances, or both. I apply this idea continuously, but often is not understood.</p>
+    <p><strong>Rob Pike</strong><br>좋은 글입니다.</p>
+    <p><strong><a href="https://x.com/karpathy/status/1872038630405054853" target="_blank">Andrej Karpathy</a></strong> <i>(ChatGPT, Tesla)</i><br>소프트웨어 엔지니어링에 관한 좋은 글입니다. 아마도 가장 진실되고, 가장 실천되지 않는 관점일 겁니다.</p>
+    <p><strong><a href="https://x.com/elonmusk/status/1872346903792566655" target="_blank">Elon Musk</a></strong><br>동의합니다.</p>
+    <p><strong><a href="https://www.linkedin.com/feed/update/urn:li:activity:7277757844970520576/" target="_blank">Addy Osmani</a></strong> <i>(Chrome, 세계에서 가장 복잡한 소프트웨어 시스템)</i><br>수많은 프로젝트에서 똑똑한 개발자들이 최신 디자인 패턴과 마이크로서비스로 인상적인 아키텍처를 만들었습니다. 하지만 새로운 팀원이 변경을 시도할 때, 전체 구조를 이해하는 데 몇 주씩 걸렸습니다. 인지 부하가 너무 높아 생산성이 급락하고 버그가 늘었습니다.</p>
+    <p>아이러니하게도, 이런 복잡성을 유발한 패턴들은 대부분 "클린 코드"라는 이름으로 도입됐습니다.</p>
+    <p>진짜 중요한 건 불필요한 인지 부담을 줄이는 것입니다. 때로는 얕은 모듈 여러 개보다 깊은 모듈 몇 개가 더 낫고, 때로는 관련 로직을 한데 모으는 게 쪼개는 것보다 낫습니다.</p>
+    <p>그리고 때로는 화려하고 세련된 해법보다 지루하고 직설적인 해법이 더 낫습니다. 최고의 코드는 가장 우아하거나 정교한 코드가 아니라, 미래의 개발자(자신 포함)가 빠르게 이해할 수 있는 코드입니다.</p>
+    <p>이 글은 브라우저 개발에서 우리가 겪는 도전과 완벽하게 공감됩니다. 현대 브라우저는 가장 복잡한 소프트웨어 시스템 중 하나입니다. Chromium에서 이 복잡성을 관리하는 것은 끊임없는 도전이며, 인지 부하에 대한 많은 지적이 정확히 들어맞습니다.</p>
+    <p>Chromium에서는 컴포넌트 격리와 서브시스템 간 명확한 인터페이스(예: 렌더링, 네트워킹, 자바스크립트 실행 등)를 통해 이 문제를 다룹니다. Unix I/O의 예처럼, 강력한 기능을 단순한 인터페이스 뒤에 숨기는 것이죠. 예를 들어, 렌더링 파이프라인은 엄청난 복잡성(레이아웃, 합성, GPU 가속 등)을 처리하지만, 개발자는 명확한 추상화 계층을 통해 다룰 수 있습니다.</p>
+    <p>불필요한 추상화를 피하라는 조언도 정말 공감됩니다. 브라우저 개발에서는 신규 기여자가 쉽게 접근할 수 있도록 하면서도, 웹 표준과 호환성이라는 본질적 복잡성을 다뤄야 합니다.</p>
+    <p>복잡한 시스템에서도, 때로는 가장 단순한 해법이 최선입니다.</p>
+    <p><strong><a href="https://x.com/antirez" target="_blank">antirez</a></strong> <i>(Redis)</i><br>전적으로 동의합니다 :) "A Philosophy of Software Design"에서 빠진 개념이 하나 있다면 "디자인 희생(design sacrifice)"입니다. 때로는 무언가를 희생함으로써 단순함이나 성능, 혹은 둘 다를 얻을 수 있습니다. 저는 이 아이디어를 항상 적용하지만, 종종 이해받지 못합니다.</p>
     <p>A good example is the fact that I always refused to have hash items expires. This is a design sacrifice because if you have certain attributes only in the top-level items (the keys themselves), the design is simpler, values will just be objects. When Redis got hash expires, it was a nice feature but required (indeed) many changes to many parts, raising the complexity.</p>
     <p>Another example is what I'm doing right now, Vector Sets, the new Redis data type. I decided that Redis would not be the source of truth about vectors, but that it can just take an approximate version of them, so I was able to do on-insert normalization, quantization without trying to retain the large floats vector on disk, and so forth. May vector DBs don't sacrifice the fact of remembering what the user put inside (the full precision vector).</p>
     <p>These are just two random examples, but I apply this idea everywhere. Now the thing is: of course one must sacrifice the right things. Often, there are 5% features that account for a very large amount of complexity: that is a good thing to kill :D</p>
